@@ -16,11 +16,21 @@ set(CMAKE_BUILD_TYPE Debug)
 # 设置 C++ 标准，需要兼容公司电脑，所以用c++11
 set(CMAKE_CXX_STANDARD 11)
 
-# 添加可执行文件 test
+# 添加可执行文件
 add_executable(test
     test/test.cpp
+    src/base64.cpp
+)
+add_executable(server
+    test/server.cpp
+    src/base64.cpp
+)
+add_executable(client
+    test/client.cpp
     src/base64.cpp
 )
 
 # 指定头文件的搜索路径，要放在前面两个的后面，因为是根据可执行文件指定的
 target_include_directories(test PRIVATE ${CMAKE_SOURCE_DIR}/src)
+target_include_directories(server PRIVATE ${CMAKE_SOURCE_DIR}/src)
+target_include_directories(client PRIVATE ${CMAKE_SOURCE_DIR}/src)
