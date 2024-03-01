@@ -217,11 +217,11 @@ int main(int argc, char *const argv[])
                 // 我在工具函数里面保证了编码之后每个子包的长度都是小于1024的
                 auto encodedList = tools::readFileAndEncode("../res/圆形.png");
 
-                // 服务端发送到客户端的接收缓冲区，由于客户端接受的性能问题，显然不是同步接受，因此需要间隔调整服务端发送图片的时间；如果服务端发送的太快，导致客户端没来得及接受，会导致缓冲区被撑爆，数据丢失
+                // 服务端发送到客户端的接收缓冲区，由于客户端接受的性能问题，显然不是同步接受，因此需要间隔调整服务端发送图片的时间；如果服务端发送的太快，导致客户端没来得及接受，会可能导致缓冲区数据丢失
                 for (auto &encode : encodedList)
                 {
                     send(connectFd, encode.c_str(), encode.size(), 0);
-                    usleep(1000 * 100); // 延迟100毫秒继续发送
+                    usleep(1000 * 75); // 经过调试，这个睡眠时间比较合适
                     std::cout << encode;
                 }
                 std::cout << std::endl;
