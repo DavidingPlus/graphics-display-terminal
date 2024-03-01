@@ -15,14 +15,34 @@
 #include <string>
 #include <iostream>
 
+/**
+ * @brief 由于都是一些函数，所以就封一个名字空间得了，不封成类
+ * @namespace base64
+ */
 namespace base64
 {
 
-    static bool is_base64(const char c) { return (isalnum(c) || (c == '+') || (c == '/')); }
+    /**
+     * @brief 判断是否为 base64 编码
+     * @param c 一个字符
+     * @return bool 值真假
+     */
+    static bool is_base64(const char &c) { return isalnum(c) or ('+' == c) or ('/' == c); }
 
-    std::string base64_encode(const char *bytes_to_encode, unsigned int in_len);
+    /**
+     * @brief 对输入的字符串进行 base64 编码
+     * @param buf 字符串首地址
+     * @param len 编码的字节长度
+     * @return 编码后的 std::string 格式字符串
+     */
+    std::string base64Encode(const char *buf, size_t len);
 
-    std::string base64_decode(const std::string &encoded_string);
+    /**
+     * @brief 对输入的已编码 base64 字符串进行解码
+     * @param encodedStr 已编码的字符串
+     * @return 解码后的 std::string 格式字符串
+     */
+    std::string base64Decode(const std::string &encodedStr);
 
 }; // namespace base64
 
