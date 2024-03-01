@@ -19,9 +19,9 @@
 #include <cstring>
 
 /**
- * @brief 定义一次最多读取的数组大小，设置为修改过后的客户端接收缓冲区的一半
+ * @brief 定义一次最多读取的数组大小
  */
-#define maxBufferSize 1024 * 256
+#define maxBufferSize 1024
 
 /**
  * @brief 由于都是一些函数，所以就封一个名字空间得了，不封成类

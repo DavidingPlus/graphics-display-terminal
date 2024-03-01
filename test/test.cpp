@@ -19,8 +19,7 @@
 /**
  * @brief 测试读取图片文件，对二进制流进行 base64 编码，然后传递给另一个文件解码再输出成拷贝文件的过程
  * @note 测试 shell 命令：
- * ./test LBJ.jpg LBJ_copy.jpg
- * ./test 基泥胎煤.png 基泥胎煤_copy.png
+ * ./test 圆形.png 圆形_copy.png
  */
 int main(int argc, char const *argv[])
 {
