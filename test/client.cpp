@@ -37,7 +37,8 @@ int main(int argc, char *const argv[])
         return -1;
     }
 
-    // 为了更快的读取图片文件，修改一下内核中接收缓冲区的大小，改为 0.5 MB
+    // 为了更快的读取图片文件，可以考虑修改一下内核中接收缓冲区的大小，例如改为 0.5 MB
+    // 但是鉴于我们的素材图片都非常小，十几KB ，接收缓冲区是完全够用的，我这边那我自己的数组（注意数组不是接收缓冲区）循环读取即可，不用担心接收缓冲区被撑爆
     // int recvBuf = 1024 * 512;
     // int res = setsockopt(connectFd, SOL_SOCKET, SO_RCVBUF, &recvBuf, sizeof(recvBuf));
     // if (-1 == res)

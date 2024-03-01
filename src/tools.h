@@ -19,7 +19,7 @@
 #include <cstring>
 
 /**
- * @brief 定义一次最多读取的数组大小
+ * @brief 定义一次最多读取的数组大小，见 client.cpp 中，定义为 1KB 即可，不用开太多，因为素材图片没那么大
  */
 #define maxBufferSize 1024
 
