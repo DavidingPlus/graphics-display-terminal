@@ -120,7 +120,7 @@ int main(int argc, char *const argv[])
                 encodedList.push_back(buf);
             }
         }
-        tools::decodeAndOutputToFile("../res/LBJ_copy.jpg", encodedList);
+        tools::decodeAndOutputToFile("../res/服创_copy.jpg", encodedList);
     }
 
     // 4. 关闭套接字
