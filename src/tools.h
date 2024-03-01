@@ -21,7 +21,7 @@
 /**
  * @brief 定义一次最多读取的数组大小
  */
-#define maxBufferSize 1024
+#define maxBufferSize 1024 * 512
 
 /**
  * @brief 由于都是一些函数，所以就封一个名字空间得了，不封成类

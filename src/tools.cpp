@@ -135,7 +135,7 @@ namespace tools
 
             if (bytesRead > 0)
             {
-                // 原字符串小于1024，编码出来的长度不一定就一定小于1024，因此这个地方做一个处理，为了后面每次包发送的时候能够正确发送，保证该长度小于1024，若大于或等于1024（有一个'\0'符号，所以这里设置为1023），则再拆包
+                // 原字符串小于 maxBufferSize ，编码出来的长度不一定就一定小于 maxBufferSize ，因此这个地方做一个处理，为了后面每次包发送的时候能够正确发送，保证该长度小于 maxBufferSize ，若大于或等于 maxBufferSize （有一个'\0'符号，所以这里设置为减一），则再拆包
                 std::string encode = tools::base64Encode(readBuf, (size_t)bytesRead);
                 while (encode.size() >= maxBufferSize)
                 {

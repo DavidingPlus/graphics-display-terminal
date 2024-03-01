@@ -37,6 +37,15 @@ int main(int argc, char *const argv[])
         return -1;
     }
 
+    // 为了更快的读取图片文件，修改一下内核中接收缓冲区的大小，改为 0.5 MB
+    int recvBuf = 1024 * 512;
+    int res = setsockopt(connectFd, SOL_SOCKET, SO_RCVBUF, &recvBuf, sizeof(recvBuf));
+    if (-1 == res)
+    {
+        perror("sersockopt");
+        return -1;
+    }
+
     // 2. 连接服务端
     struct sockaddr_in serverAddr;
     // 地址族
@@ -46,7 +55,7 @@ int main(int argc, char *const argv[])
     // 端口
     serverAddr.sin_port = htons(atoi(argv[2]));
 
-    int res = connect(connectFd, (struct sockaddr *)&serverAddr, sizeof(serverAddr));
+    res = connect(connectFd, (struct sockaddr *)&serverAddr, sizeof(serverAddr));
     if (-1 == res)
     {
         perror("connect");
@@ -111,7 +120,7 @@ int main(int argc, char *const argv[])
                 encodedList.push_back(buf);
             }
         }
-        tools::decodeAndOutputToFile("../res/鸡你太美_copy.jpg", encodedList);
+        tools::decodeAndOutputToFile("../res/LBJ_copy.jpg", encodedList);
     }
 
     // 4. 关闭套接字
