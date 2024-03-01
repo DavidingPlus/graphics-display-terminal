@@ -10,10 +10,13 @@
  */
 
 #include <iostream>
+#include <cstring>
 
 #include <arpa/inet.h>
 #include <fcntl.h>
 #include <unistd.h>
+
+#include "tools.h"
 
 /**
  * @brief 客户端程序，仅用作服务端功能测试，连接服务端，并且作信息交互
@@ -53,9 +56,62 @@ int main(int argc, char *const argv[])
     std::cout << "connect to server successfully." << std::endl;
 
     // 3. 通信
-    // TODO
+    char buf[maxBufferSize + 1] = {0};
+
     while (1)
     {
+        bzero(buf, sizeof(buf));
+        fgets(buf, sizeof(buf) - 1, stdin);
+
+        // 写
+        // 我们自定义客户端发送的信息，一次性能全部发完，所以这里就不做循环发送了
+        send(connectFd, buf, strlen(buf), 0);
+        std::cout << "send: " << buf;
+
+        // 读
+        std::vector<std::string> encodedList;
+        int len = -1;
+        while (1)
+        {
+            bzero(buf, sizeof(buf));
+            len = recv(connectFd, buf, sizeof(buf) - 1, 0);
+            if (-1 == len)
+            {
+                perror("recv");
+                return -1;
+            }
+
+            // 服务端关闭
+            if (0 == len)
+            {
+                std::cout << "server has closed." << std::endl;
+                close(connectFd);
+                exit(-1);
+            }
+            // 正常通信
+            else
+            {
+                // 自动手动退出，服务端发送的回信
+                if (0 == strcmp("exit success\n", buf))
+                {
+                    close(connectFd);
+                    exit(-1);
+                }
+
+                // 传输结束
+                if (0 == strcmp("send over\n", buf))
+                {
+                    std::cout << "\nrecv over\n";
+                    break;
+                }
+
+                // 我们默认数据传输过程中不会出现问题
+                // 经过 tools 中的处理，这里的 buf 每一个最多都只能是 1024 字节，不会溢出
+                std::cout << buf;
+                encodedList.push_back(buf);
+            }
+        }
+        tools::decodeAndOutputToFile("../res/鸡你太美_copy.jpg", encodedList);
     }
 
     // 4. 关闭套接字

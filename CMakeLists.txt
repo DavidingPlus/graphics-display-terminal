@@ -19,15 +19,18 @@ set(CMAKE_CXX_STANDARD 11)
 # 添加可执行文件
 add_executable(test
     test/test.cpp
-    src/base64.cpp
+    src/tools.cpp
+    src/clientInfo.cpp
 )
 add_executable(server
     test/server.cpp
-    src/base64.cpp
+    src/tools.cpp
+    src/clientInfo.cpp
 )
 add_executable(client
     test/client.cpp
-    src/base64.cpp
+    src/tools.cpp
+    src/clientInfo.cpp
 )
 
 # 指定头文件的搜索路径，要放在前面两个的后面，因为是根据可执行文件指定的

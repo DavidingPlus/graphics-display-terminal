@@ -1,7 +1,7 @@
 /**
- * @file base64.cpp
+ * @file tools.cpp
  * @author lzx0626 (2065666169@qq.com)
- * @brief 提供一种 base64 编码算法的源文件
+ * @brief 工具函数存放的头文件，包括读取图片文件，进行 base64 编码解码等
  * @version 1.0
  * @date 2024-02-29
  *
@@ -9,10 +9,11 @@
  *
  */
 
-#include "base64.h"
+#include "tools.h"
 
-namespace base64
+namespace tools
 {
+    bool isBase64(const char &c) { return isalnum(c) or ('+' == c) or ('/' == c); }
 
     std::string base64Encode(const char *buf, size_t len)
     {
@@ -74,7 +75,7 @@ namespace base64
         unsigned char char_array_4[4] = {0}, char_array_3[3] = {0};
         std::string res;
 
-        while (len-- and (encodedStr[in_] != '=') and is_base64(encodedStr[in_]))
+        while (len-- and (encodedStr[in_] != '=') and isBase64(encodedStr[in_]))
         {
             char_array_4[i++] = encodedStr[in_];
             ++in_;
@@ -111,4 +112,63 @@ namespace base64
 
         return res;
     }
-} // namespace base64
+
+    std::vector<std::string> readFileAndEncode(const char *filePath)
+    {
+        std::vector<std::string> res;
+
+        // 打开文件
+        std::ifstream file(filePath, std::ios::binary);
+        if (!file)
+        {
+            std::cerr << "readFileAndEncode: can not open target file.\n";
+            exit(-1);
+        }
+
+        // 读取
+        char readBuf[maxBufferSize + 1] = {0}; // 以后开buf，这里为了保险都多开一个字节
+        while (!file.eof())
+        {
+            bzero(readBuf, sizeof(readBuf));
+            file.read(readBuf, maxBufferSize - 1);
+            std::streamsize bytesRead = file.gcount();
+
+            if (bytesRead > 0)
+            {
+                // 原字符串小于1024，编码出来的长度不一定就一定小于1024，因此这个地方做一个处理，为了后面每次包发送的时候能够正确发送，保证该长度小于1024，若大于或等于1024（有一个'\0'符号，所以这里设置为1023），则再拆包
+                std::string encode = tools::base64Encode(readBuf, (size_t)bytesRead);
+                while (encode.size() >= maxBufferSize)
+                {
+                    res.push_back(std::string{encode.begin(), encode.begin() + maxBufferSize});
+                    encode.erase(encode.begin(), encode.begin() + maxBufferSize);
+                }
+                res.push_back(encode);
+            }
+        }
+
+        // 关闭文件
+        file.close();
+
+        return res;
+    }
+
+    void decodeAndOutputToFile(const char *outputFilePath, const std::vector<std::string> &encodedList)
+    {
+        // 打开文件
+        std::ofstream file(outputFilePath, std::ios::binary);
+        if (!file)
+        {
+            std::cerr << "decodeAndOutputToFile: can not open target file.\n";
+            exit(-1);
+        }
+
+        for (auto &encode : encodedList)
+        {
+            std::string decode = tools::base64Decode(encode);
+            file.write(decode.c_str(), decode.size());
+        }
+
+        // 关闭文件
+        file.close();
+    }
+} // namespace tools

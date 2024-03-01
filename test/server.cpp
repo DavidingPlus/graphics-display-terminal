@@ -10,14 +10,31 @@
  */
 
 #include <iostream>
+#include <cstring>
 
 #include <sys/epoll.h>
 #include <arpa/inet.h>
 #include <fcntl.h>
 #include <unistd.h>
 
+#include "clientInfo.h"
+#include "tools.h"
+
+/**
+ * @brief 定义 epoll 能检测的最大事件个数max_events
+ */
 #define maxEvents 1000
-#define maxIpv4Len 16
+
+/**
+ * @brief 定义退出成功时候服务端返回的信息
+ */
+static const char *exitSuccess = "exit success\n";
+
+/**
+ * @brief 定义图片发送完毕时候返回的信息
+ *
+ */
+static const char *sendOver = "send over\n";
 
 /**
  * @brief 服务端主程序，接受客户端连接，并且作信息交互
@@ -29,6 +46,9 @@ int main(int argc, char *const argv[])
         std::cerr << "usage:  ./server  <port>\n";
         return -1;
     }
+
+    // 创建存储客户端信息的结构体
+    struct clientInfo cliInfos[10 + maxEvents];
 
     // 1. 创建socket套接字
     int listenFd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -120,12 +140,13 @@ int main(int argc, char *const argv[])
                     return -1;
                 }
 
-                // 输出客户端信息
-                char clientIp[maxIpv4Len] = {0};
-                inet_ntop(AF_INET, &clientAddr.sin_addr.s_addr, clientIp, sizeof(clientIp));
+                // 处理客户端信息，存入结构体，下标为 connectFd
+                cliInfos[connectFd].port = ntohs(clientAddr.sin_port);
+                inet_ntop(AF_INET, &clientAddr.sin_addr.s_addr, cliInfos[connectFd].ip, maxIpv4Len);
 
-                std::cout << "client (ip: " << clientIp << " , "
-                          << "port: " << ntohs(clientAddr.sin_port) << ") has connected." << std::endl;
+                // 打印信息
+                std::cout << "client (ip: " << cliInfos[connectFd].ip << " , "
+                          << "port: " << cliInfos[connectFd].port << ") has connected." << std::endl;
 
                 // 设置读取为非阻塞，因为这是 NIO 模型
                 fcntl(connectFd, F_SETFL, O_NONBLOCK | fcntl(connectFd, F_GETFL));
@@ -145,7 +166,64 @@ int main(int argc, char *const argv[])
             // 旧客户端通信
             else
             {
-                // TODO
+                int connectFd = resEvents[i].data.fd;
+                char readBuf[maxBufferSize + 1] = {0};
+
+                // 读
+                int len = recv(connectFd, readBuf, sizeof(readBuf) - 1, 0);
+                if (-1 == len)
+                {
+                    // 由于读取是非阻塞的，这里有两种情况需要特殊判断，但是这里遇不到
+                    // errno==EINTR，收到信号并从信号处理函数返回时，慢系统调用会返回并设置errno为EINTR，应该重新调用read。
+                    // errno==EAGAIN，表示当前暂时没有数据可读，应该稍后读取。
+                    perror("recv");
+                    return -1;
+                }
+                // 客户端关闭，包括客户端强制断开连接和输入 exit 退出
+                if (0 == len or 0 == strcmp("exit\n", readBuf))
+                {
+                    if (0 == strcmp("exit\n", readBuf))
+                    {
+                        std::cout << "client (ip: " << cliInfos[connectFd].ip << " , "
+                                  << "port: " << cliInfos[connectFd].port << ") send: " << readBuf;
+
+                        // 发送规定回信
+                        send(connectFd, exitSuccess, strlen(exitSuccess), 0);
+                    }
+
+                    // 从监听事件中删除
+                    res = epoll_ctl(epollFd, EPOLL_CTL_DEL, connectFd, nullptr);
+                    if (-1 == res)
+                    {
+                        perror("epoll_ctl");
+                        return -1;
+                    }
+
+                    std::cout << "client (ip: " << cliInfos[connectFd].ip << " , "
+                              << "port: " << cliInfos[connectFd].port << ") has closed." << std::endl;
+                    cliInfos[connectFd].clear();
+
+                    // 关闭文件描述符
+                    close(connectFd);
+                }
+                else
+                    std::cout << "client (ip: " << cliInfos[connectFd].ip << " , "
+                              << "port: " << cliInfos[connectFd].port << ") send: " << readBuf;
+
+                // 写
+                // 读取图片并且发送图片
+                // 我在工具函数里面保证了编码之后每个子包的长度都是小于1024的
+                auto encodedList = tools::readFileAndEncode("../res/鸡你太美.jpg");
+
+                // 服务端发送到客户端的接收缓冲区，由于客户端接受的性能问题，显然不是同步接受，因此需要间隔调整服务端发送图片的时间；如果服务端发送的太快，导致客户端没来得及接受，会导致缓冲区被撑爆，数据丢失
+                for (auto &encode : encodedList)
+                {
+                    send(connectFd, encode.c_str(), encode.size(), 0);
+                    usleep(1000); // 延迟1毫秒继续发送
+                    std::cout << encode;
+                }
+                std::cout << std::endl;
+                send(connectFd, sendOver, strlen(sendOver), 0);
             }
         }
     }
