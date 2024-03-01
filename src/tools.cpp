@@ -130,7 +130,7 @@ namespace tools
         while (!file.eof())
         {
             bzero(readBuf, sizeof(readBuf));
-            file.read(readBuf, maxBufferSize - 1);
+            file.read(readBuf, sizeof(readBuf) - 1);
             std::streamsize bytesRead = file.gcount();
 
             if (bytesRead > 0)

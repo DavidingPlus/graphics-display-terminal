@@ -205,6 +205,8 @@ int main(int argc, char *const argv[])
 
                     // 关闭文件描述符
                     close(connectFd);
+
+                    continue;
                 }
                 else
                     std::cout << "client (ip: " << cliInfos[connectFd].ip << " , "
