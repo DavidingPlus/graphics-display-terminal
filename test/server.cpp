@@ -225,6 +225,8 @@ int main(int argc, char *const argv[])
                     std::cout << encode;
                 }
                 std::cout << std::endl;
+                // 这里也做一个睡眠吧，因为留意到客户端的接收可能会把结束信息和前面的混在一起，所以这里刻意睡眠500ms
+                usleep(1000 * 500);
                 send(connectFd, sendOver, strlen(sendOver), 0);
             }
         }
