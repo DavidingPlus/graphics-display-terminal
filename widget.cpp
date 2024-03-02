@@ -21,10 +21,12 @@ Widget::Widget(QWidget* parent)
     ui->setupUi(this);
 
     // note： 以下的示例是 Qt 的服务端和客户端的正确方法，和自己用过的 Linux 平台接口不同，用的时候查资料即可
+    // note:  这只是一个简单的示例，后续真正写客户端的时候，都是通过信号槽实现，不会这么像这么连贯的操作
 
     // 1. 连接服务端
+    QString serverIp = "127.0.0.1";
     QTcpSocket* clientSock = new QTcpSocket(this);
-    clientSock->connectToHost(QString("106.55.60.140"), uint16_t(8080));
+    clientSock->connectToHost(serverIp, uint16_t(8080));
 
     // 2. 等待连接成功
     clientSock->waitForConnected();
@@ -33,20 +35,32 @@ Widget::Widget(QWidget* parent)
     while(clientSock->state() != QAbstractSocket::ConnectedState)
         QCoreApplication::processEvents();
 
-    // 4. 发送信息
+    // 4. Qt 中接收信息，直接接收我也不知道为啥接收不到，推荐使用信号槽的方式，因此这里绑定在前面
+    connect(clientSock, &QTcpSocket::readyRead, this, [ = ]()
+    {
+        QByteArray readBuf = clientSock->readAll();
+        qDebug() << readBuf;
+
+        //做退出的判断
+        if(QString("exit success\n") == QString(readBuf))
+            clientSock->disconnectFromHost();
+
+//        QString decode = QString::fromStdString(base64Decode(readBuf.toStdString()));
+//        qDebug() << decode;
+    });
+
+    // 5. 发送信息
     QString sendMessage("send\n");
     clientSock->write(sendMessage.toUtf8());
     //不缓存，直接发送，否则不会立即发出去
     clientSock->flush();
 
-    // 5. Qt 中接收信息，直接接收我也不知道为啥接收不到，推荐使用信号槽的方式
-    connect(clientSock, &QTcpSocket::readyRead, this, [ = ]()
-    {
-        QByteArray readBuf = clientSock->readAll();
-        qDebug() << readBuf;
-//        QString decode = QString::fromStdString(base64Decode(readBuf.toStdString()));
-//        qDebug() << decode;
-    });
+    Sleep(5000);
+
+    // 6. 退出
+    sendMessage = "exit\n";
+    clientSock->write(sendMessage.toUtf8());
+    clientSock->flush();
 }
 
 Widget::~Widget()
