@@ -33,11 +33,18 @@ Widget::~Widget()
 
 void Widget::on_connectBtn_clicked()
 {
+    // 已连接不可再连接
+    if(QAbstractSocket::ConnectedState == clientSock->state())
+    {
+        qDebug() << "already connected to server, can not connect again!";
+        return;
+    }
+
     // 连接服务端
-    clientSock->connectToHost(QString("127.0.0.1"), quint16(8080));
+    clientSock->connectToHost(QString("106.55.60.140"), quint16(8080));
 
     // 等待连接成功
-    bool res = clientSock->waitForConnected(5);
+    bool res = clientSock->waitForConnected();
     if(false == res)
     {
         qDebug() << "fail to connect to server, please check your IP or port.";
@@ -53,6 +60,13 @@ void Widget::on_connectBtn_clicked()
 
 void Widget::on_recvBtn_clicked()
 {
+    // 未连接不可发送信息
+    if(QAbstractSocket::UnconnectedState == clientSock->state())
+    {
+        qDebug() << "not connected to server, can not recv any message from server!";
+        return;
+    }
+
     // 发送信息
     QString sendMessage("send\n");
     clientSock->write(sendMessage.toUtf8());
@@ -62,6 +76,13 @@ void Widget::on_recvBtn_clicked()
 
 void Widget::on_disconnectBtn_clicked()
 {
+    // 为连接不可断开连接
+    if(QAbstractSocket::UnconnectedState == clientSock->state())
+    {
+        qDebug() << "not connected to server, can not disconnect from server!";
+        return;
+    }
+
     // 发送断开连接信息
     QString sendMessage("exit\n");
     clientSock->write(sendMessage.toUtf8());
