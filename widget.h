@@ -6,6 +6,8 @@
 #include <synchapi.h>
 #include <QtNetwork>
 #include <QDebug>
+#include <QByteArray>
+#include <QFile>
 
 #include <iostream>
 #include <string>
@@ -28,6 +30,11 @@ public:
     Widget(QWidget* parent = nullptr);
     ~Widget();
 
+signals:
+    // 用作图片数据接收完毕之后写入文件发送的信号
+    void recvOver();
+
+private:
     bool isBase64(const char& c);
     std::string base64Decode(const std::string& encodedStr);
 
@@ -44,5 +51,7 @@ private:
     // TcpSocket连接对象
     QTcpSocket* clientSock = nullptr;
 
+    // 存储传递过来的编码过后的图片字节流
+    QByteArray decode;
 };
 #endif // WIDGET_H
