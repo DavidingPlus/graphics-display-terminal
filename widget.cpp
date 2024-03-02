@@ -1,66 +1,29 @@
 #include "widget.h"
 #include "ui_widget.h"
 
-#include <synchapi.h>
-#include <QtNetwork>
-#include <QDebug>
-
-#include <iostream>
-#include <string>
-#include <cstring>
-
-#define maxBufferSize 1024
-
-std::string base64Decode(const std::string& encodedStr);
-bool isBase64(const char& c);
-
 Widget::Widget(QWidget* parent)
     : QWidget(parent)
     , ui(new Ui::Widget)
 {
     ui->setupUi(this);
 
-    // note： 以下的示例是 Qt 的服务端和客户端的正确方法，和自己用过的 Linux 平台接口不同，用的时候查资料即可
-    // note:  这只是一个简单的示例，后续真正写客户端的时候，都是通过信号槽实现，不会这么像这么连贯的操作
+    // note： Qt 中的服务端和客户端的正确方法，和自己用过的 Linux 平台接口不同，用的时候记得查资料
+    clientSock = new QTcpSocket(this);
 
-    // 1. 连接服务端
-    QString serverIp = "127.0.0.1";
-    QTcpSocket* clientSock = new QTcpSocket(this);
-    clientSock->connectToHost(serverIp, uint16_t(8080));
-
-    // 2. 等待连接成功
-    clientSock->waitForConnected();
-
-    // 3. 等待状态转换完成
-    while(clientSock->state() != QAbstractSocket::ConnectedState)
-        QCoreApplication::processEvents();
-
-    // 4. Qt 中接收信息，直接接收我也不知道为啥接收不到，推荐使用信号槽的方式，因此这里绑定在前面
-    connect(clientSock, &QTcpSocket::readyRead, this, [ = ]()
+    //绑定信号槽，服务端发送信息过来之后自动打印（前提是客户端发送有效信息）
+    connect(clientSock, &QTcpSocket::readyRead, [ = ]()
     {
         QByteArray readBuf = clientSock->readAll();
         qDebug() << readBuf;
 
         //做退出的判断
         if(QString("exit success\n") == QString(readBuf))
+        {
             clientSock->disconnectFromHost();
+            qDebug() << "disconnect from server successfully.";
+        }
 
-//        QString decode = QString::fromStdString(base64Decode(readBuf.toStdString()));
-//        qDebug() << decode;
     });
-
-    // 5. 发送信息
-    QString sendMessage("send\n");
-    clientSock->write(sendMessage.toUtf8());
-    //不缓存，直接发送，否则不会立即发出去
-    clientSock->flush();
-
-    Sleep(5000);
-
-    // 6. 退出
-    sendMessage = "exit\n";
-    clientSock->write(sendMessage.toUtf8());
-    clientSock->flush();
 }
 
 Widget::~Widget()
@@ -68,12 +31,51 @@ Widget::~Widget()
     delete ui;
 }
 
-bool isBase64(const char& c)
+void Widget::on_connectBtn_clicked()
+{
+    // 连接服务端
+    clientSock->connectToHost(QString("127.0.0.1"), quint16(8080));
+
+    // 等待连接成功
+    bool res = clientSock->waitForConnected(5);
+    if(false == res)
+    {
+        qDebug() << "fail to connect to server, please check your IP or port.";
+        return;
+    }
+
+    // 等待状态转换完成
+    while(clientSock->state() != QAbstractSocket::ConnectedState)
+        QCoreApplication::processEvents();
+
+    qDebug() << "connect to server successfully.";
+}
+
+void Widget::on_recvBtn_clicked()
+{
+    // 发送信息
+    QString sendMessage("send\n");
+    clientSock->write(sendMessage.toUtf8());
+    //不缓存，直接发送，否则不会立即发出去
+    clientSock->flush();
+}
+
+void Widget::on_disconnectBtn_clicked()
+{
+    // 发送断开连接信息
+    QString sendMessage("exit\n");
+    clientSock->write(sendMessage.toUtf8());
+    clientSock->flush();
+
+    // 与服务端断开连接已在接收信息的信号槽中处理
+}
+
+bool Widget::isBase64(const char& c)
 {
     return isalnum(c) or ('+' == c) or ('/' == c);
 }
 
-std::string base64Decode(const std::string& encodedStr)
+std::string Widget::base64Decode(const std::string& encodedStr)
 {
     const std::string base64_chars =
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
