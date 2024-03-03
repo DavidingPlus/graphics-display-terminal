@@ -81,10 +81,12 @@ Widget::Widget(QWidget* parent)
     // 绑定信号槽，图片写入完毕之后准备绘图
     connect(this, &Widget::recvAndWriteOver, [ = ]()
     {
-        // TODO： 画图片的逻辑有问题，只有鸡你太美能画出来，我也不知道为什么。。。
-        ui->picLabel->setScaledContents(true); // 这条是让图片自适应 Label ，不然显示不完整
+
         qDebug() << file->fileName();
-        ui->picLabel->setPixmap(QPixmap(file->fileName()));
+        qDebug() << file->exists();
+        // TODO： 画图片的逻辑有问题，图片能正确接收但是绘图的时候出问题
+//        ui->picLabel->setScaledContents(true); // 这条是让图片自适应 Label ，不然显示不完整
+//        ui->picLabel->setPixmap(file->fileName());
     });
 }
 
@@ -121,7 +123,6 @@ void Widget::on_connectBtn_clicked()
 
     // 等待连接成功，等待时间3秒，太长经测试会让程序卡死
     bool res = clientSock->waitForConnected(3000);// 单位是毫秒
-    qDebug() << res;
     if(false == res)
     {
         qDebug() << "fail to connect to server, please check your IP or port.";
