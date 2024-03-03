@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>826</width>
+    <width>876</width>
     <height>650</height>
    </rect>
   </property>
@@ -20,8 +20,8 @@
       <widget class="QWidget" name="widget" native="true">
        <property name="minimumSize">
         <size>
-         <width>400</width>
-         <height>0</height>
+         <width>425</width>
+         <height>425</height>
         </size>
        </property>
        <property name="maximumSize">
@@ -99,8 +99,8 @@
       <widget class="QLabel" name="picLabel">
        <property name="minimumSize">
         <size>
-         <width>400</width>
-         <height>400</height>
+         <width>425</width>
+         <height>425</height>
         </size>
        </property>
        <property name="text">
@@ -133,7 +133,7 @@
        </widget>
       </item>
       <item row="1" column="1">
-       <widget class="QPushButton" name="recvBtn">
+       <widget class="QPushButton" name="recvPicBtn">
         <property name="minimumSize">
          <size>
           <width>0</width>

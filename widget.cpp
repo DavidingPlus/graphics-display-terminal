@@ -11,21 +11,9 @@ Widget::Widget(QWidget* parent)
     clientSock = new QTcpSocket(this);
     decode.clear();
 
-    // 先创建存储图片的目录
-    QDir dir;
-    if(dir.exists("./res"))
-        dir.rmdir(QString("./res"));
-    dir.mkdir(QString("./res"));
-
-    // 新开文件
-    file = new QFile(QString("./res/鸡你太美_copy.png"), this);
-
     //绑定信号槽，服务端发送信息过来之后自动打印（前提是客户端发送有效信息）
     connect(clientSock, &QTcpSocket::readyRead, this, [ = ]()
     {
-        if(false == file->isOpen())
-            file->open(QFile::ReadWrite);
-
         QByteArray readBuf = clientSock->readAll(); // 这里 Qt 提供了一次性读完的功能
         qDebug() << readBuf;
 
@@ -34,7 +22,27 @@ Widget::Widget(QWidget* parent)
         {
             clientSock->disconnectFromHost();
             qDebug() << "disconnect from server successfully.";
+            QMessageBox::information(this, "断开连接", "与服务端断开连接成功！");
 
+            return;
+        }
+
+        // 图片个数，不做任何处理，仅作过滤作用
+        if( 0 == picNum)
+        {
+            picNum = readBuf.toInt();
+            return;
+        }
+
+        // 图片名字
+        if(isPicName)
+        {
+            // 打开文件
+            QString filePath = QString("./res/") + QString(readBuf);
+            file = new QFile(filePath, this);
+            file->open(QFile::ReadWrite);
+
+            isPicName = false;
             return;
         }
 
@@ -42,10 +50,24 @@ Widget::Widget(QWidget* parent)
         if( QString("send over\n") == QString(readBuf))
         {
             decode.clear();
-            file->close();
 
             // 图片已经写入文件完毕
             emit recvAndWriteOver();
+
+            // 关闭文件
+            file->close();
+
+            // 修改图片名字标志位，下一次可读取
+            isPicName = true;
+
+            // 如果全部接收完毕，弹出一个提示窗口
+            if( picNum == ++picIndex)
+            {
+                qDebug() << "recv pic successfully.";
+                QMessageBox::information(this, "接收图片", "图片数据接收完毕！");
+
+                isRecvPic = false;
+            }
 
             return;
         }
@@ -59,11 +81,10 @@ Widget::Widget(QWidget* parent)
     // 绑定信号槽，图片写入完毕之后准备绘图
     connect(this, &Widget::recvAndWriteOver, [ = ]()
     {
-        QImage image;
-        image.load("./res/鸡你太美_copy.png");
-        ui->picLabel->setPixmap(QPixmap::fromImage(image));
-        ui->picLabel->setGeometry(image.rect());
-        ui->picLabel->show();
+        // TODO： 画图片的逻辑有问题，只有鸡你太美能画出来，我也不知道为什么。。。
+        ui->picLabel->setScaledContents(true); // 这条是让图片自适应 Label ，不然显示不完整
+        qDebug() << file->fileName();
+        ui->picLabel->setPixmap(QPixmap(file->fileName()));
     });
 }
 
@@ -78,6 +99,17 @@ void Widget::on_connectBtn_clicked()
     if(QAbstractSocket::ConnectedState == clientSock->state())
     {
         qDebug() << "already connected to server, can not connect again!";
+        QMessageBox::warning(this, "连接", "您已经连接上了服务端，不可再次连接！");
+
+        return;
+    }
+
+    // 正在传输不可点击
+    if(isRecvPic)
+    {
+        qDebug() << "recving pic right now!";
+        QMessageBox::warning(this, "连接", "您正在进行传输，不可进行连接！");
+
         return;
     }
 
@@ -87,12 +119,14 @@ void Widget::on_connectBtn_clicked()
     quint16 serverPort =  quint16(ui->portEdit->text().toInt());
     clientSock->connectToHost(serverIP, serverPort);
 
-    // 等待连接成功，等待时间5秒，太长经测试会让程序卡死
-    bool res = clientSock->waitForConnected(5000);// 单位是毫秒
+    // 等待连接成功，等待时间3秒，太长经测试会让程序卡死
+    bool res = clientSock->waitForConnected(3000);// 单位是毫秒
     qDebug() << res;
     if(false == res)
     {
         qDebug() << "fail to connect to server, please check your IP or port.";
+        QMessageBox::warning(this, "连接", "服务端 IP 或端口错误，请您检查后重试！");
+
         return;
     }
 
@@ -104,16 +138,46 @@ void Widget::on_connectBtn_clicked()
     ui->isConnectedLabel->setText("连接状态：已连接");
 
     qDebug() << "connect to server successfully.";
+    QMessageBox::information(this, "连接", "连接服务端成功！");
 }
 
-void Widget::on_recvBtn_clicked()
+void Widget::on_recvPicBtn_clicked()
 {
     // 未连接不可发送信息
     if(QAbstractSocket::UnconnectedState == clientSock->state())
     {
         qDebug() << "not connected to server, can not recv any message from server!";
+        QMessageBox::warning(this, "接收图片", "您尚未连接，不可接收图片！");
+
         return;
     }
+
+    // 正在传输不可再次点击
+    if(isRecvPic)
+    {
+        qDebug() << "recving pic right now!";
+        QMessageBox::warning(this, "接收图片", "您正在进行传输，不可再次发送接收图片请求！");
+
+        return;
+    }
+
+    // 修改发送图片个数的标志位
+    picNum = 0;
+
+    // 修改图片发送到第几张
+    picIndex = 0;
+
+    // 修改发送图片名字的标志位
+    isPicName = true;
+
+    // 修改是否正在传输标志位
+    isRecvPic = true;
+
+    // 处理存储图片的目录，先删除在创建
+    QDir dir("./"),
+         subDir("./res/");
+    subDir.removeRecursively();
+    dir.mkdir("./res/");
 
     // 发送信息
     QString sendMessage("send\n");
@@ -124,10 +188,21 @@ void Widget::on_recvBtn_clicked()
 
 void Widget::on_disconnectBtn_clicked()
 {
-    // 为连接不可断开连接
+    // 未连接不可断开连接
     if(QAbstractSocket::UnconnectedState == clientSock->state())
     {
         qDebug() << "not connected to server, can not disconnect from server!";
+        QMessageBox::warning(this, "断开连接", "您尚未连接，不可断开连接！");
+
+        return;
+    }
+
+    // 正在传输不可点击
+    if(isRecvPic)
+    {
+        qDebug() << "recving pic right now!";
+        QMessageBox::warning(this, "断开连接", "您正在进行传输，不可断开连接！");
+
         return;
     }
 

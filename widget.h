@@ -8,8 +8,11 @@
 #include <QDebug>
 #include <QByteArray>
 #include <QFile>
+#include <QDir>
 #include <QImage>
 #include <QPixmap>
+#include <QMessageBox>
+#include <QImageReader>
 
 #include <iostream>
 #include <string>
@@ -43,7 +46,7 @@ private:
 private slots:
     void on_connectBtn_clicked();
 
-    void on_recvBtn_clicked();
+    void on_recvPicBtn_clicked();
 
     void on_disconnectBtn_clicked();
 
@@ -58,5 +61,17 @@ private:
 
     // 存储写入文件的指针
     QFile* file = nullptr;
+
+    // 存储接收图片的个数
+    int picNum = 0;
+
+    // 存储图片接受过程中接收的是第几张
+    int picIndex = 0;
+
+    // 存储发送图片名字的标志位
+    bool isPicName = false;
+
+    // 记录是否在进行图片传输，防止接收过程中乱点
+    bool isRecvPic = false;
 };
 #endif // WIDGET_H
