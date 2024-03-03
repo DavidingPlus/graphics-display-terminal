@@ -15,12 +15,17 @@ Widget::Widget(QWidget* parent)
     QDir dir;
     if(dir.exists("./res"))
         dir.rmdir(QString("./res"));
-    Sleep(3000);
     dir.mkdir(QString("./res"));
 
+    // 新开文件
+    file = new QFile(QString("./res/鸡你太美_copy.png"), this);
+
     //绑定信号槽，服务端发送信息过来之后自动打印（前提是客户端发送有效信息）
-    connect(clientSock, &QTcpSocket::readyRead, [ = ]()
+    connect(clientSock, &QTcpSocket::readyRead, this, [ = ]()
     {
+        if(false == file->isOpen())
+            file->open(QFile::ReadWrite);
+
         QByteArray readBuf = clientSock->readAll(); // 这里 Qt 提供了一次性读完的功能
         qDebug() << readBuf;
 
@@ -29,42 +34,36 @@ Widget::Widget(QWidget* parent)
         {
             clientSock->disconnectFromHost();
             qDebug() << "disconnect from server successfully.";
+
+            return;
         }
 
         // 做结束读取的判断
         if( QString("send over\n") == QString(readBuf))
         {
-            Sleep(2000);
-            qDebug() << decode;
+            decode.clear();
+            file->close();
 
-            // TODO：由于网络传输过程中可能出现各种各样的丢失，为了保证图片正常读取，考虑加一个校验文件大小的判断，失败则重传（本地传不会有这个问题）
+            // 图片已经写入文件完毕
+            emit recvAndWriteOver();
 
-            // 发送结束读取的信号
-            emit recvOver();
             return;
         }
 
         // 写入字节数组
-        decode += QByteArray::fromStdString(base64Decode(readBuf.toStdString()));
+        decode = QByteArray::fromStdString(base64Decode(readBuf.toStdString()));
+        file->write(decode);
+        decode.clear();
     });
 
-    // 绑定信号槽，图片数据读取完毕之后写入文件
-    connect(this, &Widget::recvOver, [ = ]()
+    // 绑定信号槽，图片写入完毕之后准备绘图
+    connect(this, &Widget::recvAndWriteOver, [ = ]()
     {
-        qDebug() << "start to writing into file.";
-
-        // 将字节数组写入文件
-        // TODO：想改成边读取边写入
-        QFile file(QString("./res/圆形_copy.png"), this);
-        file.open(QFile::ReadWrite);
-        file.write(decode);
-
-        qDebug() << "write all data successfully.";
-
-        file.close();
-
-        // 写入完毕清空 decode
-        decode.clear();
+        QImage image;
+        image.load("./res/鸡你太美_copy.png");
+        ui->picLabel->setPixmap(QPixmap::fromImage(image));
+        ui->picLabel->setGeometry(image.rect());
+        ui->picLabel->show();
     });
 }
 
@@ -101,6 +100,9 @@ void Widget::on_connectBtn_clicked()
     while(clientSock->state() != QAbstractSocket::ConnectedState)
         QCoreApplication::processEvents();
 
+    // 修改 isConnectedLabel 内容
+    ui->isConnectedLabel->setText("连接状态：已连接");
+
     qDebug() << "connect to server successfully.";
 }
 
@@ -134,7 +136,10 @@ void Widget::on_disconnectBtn_clicked()
     clientSock->write(sendMessage.toUtf8());
     clientSock->flush();
 
-    // note： 与服务端断开连接已在接收信息的信号槽中处理，当然也只在我这么写的服务端中可以这么处理
+    // 修改 isConnectedLabel 内容
+    ui->isConnectedLabel->setText("连接状态：未连接");
+
+    // note： 与服务端断开连接已在接收信息的信号槽中处理，当然这么处理的前提是服务端与客户端协商好通信规则
 }
 
 bool Widget::isBase64(const char& c)
