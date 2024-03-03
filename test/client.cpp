@@ -79,49 +79,91 @@ int main(int argc, char *const argv[])
         std::cout << "send: " << buf;
 
         // 读
-        std::vector<std::string> encodedList;
+        // 读取图片的个数
         int len = -1;
-        while (1)
-        {
-            bzero(buf, sizeof(buf));
-            len = recv(connectFd, buf, sizeof(buf) - 1, 0);
-            if (-1 == len)
-            {
-                perror("recv");
-                return -1;
-            }
 
-            // 服务端关闭
-            if (0 == len)
+        bzero(buf, sizeof(buf));
+        len = recv(connectFd, buf, sizeof(buf) - 1, 0);
+
+        if (-1 == len)
+        {
+            perror("recv");
+            return -1;
+        }
+
+        // 服务端关闭
+        if (0 == len)
+        {
+            std::cout << "server has closed." << std::endl;
+            close(connectFd);
+            exit(-1);
+        }
+
+        else
+        {
+            // 这里可能是正常手动退出，服务端发送的回信
+            if (0 == strcmp("exit success\n", buf))
             {
-                std::cout << "server has closed." << std::endl;
                 close(connectFd);
                 exit(-1);
             }
-            // 正常通信
-            else
+
+            int fileNum = atoi(buf);
+            for (int i = 0; i < fileNum; ++i)
             {
-                // 自动手动退出，服务端发送的回信
-                if (0 == strcmp("exit success\n", buf))
+                std::vector<std::string> encodedList;
+                std::string outputFilePath;
+                int num = 0; // 第一次发送的数据是图片的名称
+
+                while (1)
                 {
-                    close(connectFd);
-                    exit(-1);
+                    bzero(buf, sizeof(buf));
+                    len = recv(connectFd, buf, sizeof(buf) - 1, 0);
+                    if (-1 == len)
+                    {
+                        perror("recv");
+                        return -1;
+                    }
+
+                    // 服务端关闭
+                    if (0 == len)
+                    {
+                        std::cout << "server has closed." << std::endl;
+                        close(connectFd);
+                        exit(-1);
+                    }
+                    // 正常通信
+                    else
+                    {
+                        // 传输结束
+                        if (0 == strcmp("send over\n", buf))
+                        {
+                            std::cout << "\nrecv over pic number " << (1 + i) << "\n";
+                            break;
+                        }
+
+                        // 第一次
+                        if (0 == num++)
+                        {
+                            outputFilePath = std::string("../res/") + std::string(buf);
+                            // 加上 _copy 后缀
+                            for (int i = 0; i < 4; ++i)
+                                outputFilePath.pop_back();
+                            outputFilePath += "_copy.png";
+
+                            continue;
+                        }
+
+                        // 我们默认数据传输过程中不会出现问题
+                        // 经过 tools 中的处理，这里的 buf 每一个最多都只能是 1024 字节，不会溢出
+                        std::cout << buf;
+                        encodedList.push_back(buf);
+                    }
                 }
 
-                // 传输结束
-                if (0 == strcmp("send over\n", buf))
-                {
-                    std::cout << "\nrecv over\n";
-                    break;
-                }
-
-                // 我们默认数据传输过程中不会出现问题
-                // 经过 tools 中的处理，这里的 buf 每一个最多都只能是 1024 字节，不会溢出
-                std::cout << buf;
-                encodedList.push_back(buf);
+                tools::decodeAndOutputToFile(outputFilePath.c_str(), encodedList);
             }
         }
-        tools::decodeAndOutputToFile("../res/鸡你太美_copy.png", encodedList);
     }
 
     // 4. 关闭套接字

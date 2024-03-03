@@ -209,25 +209,42 @@ int main(int argc, char *const argv[])
                     continue;
                 }
                 else
+                {
                     std::cout << "client (ip: " << cliInfos[connectFd].ip << " , "
                               << "port: " << cliInfos[connectFd].port << ") send: " << readBuf;
+                }
 
                 // 写
                 // 读取图片并且发送图片
                 // 我在工具函数里面保证了编码之后每个子包的长度都是小于1024的
-                auto encodedList = tools::readFileAndEncode("../res/鸡你太美.png");
+                // 读取目录中的所有文件，并且发送
+                auto fileNameList = tools::getAllFileName("../res");
 
-                // 服务端发送到客户端的接收缓冲区，由于客户端接受的性能问题，显然不是同步接受，因此需要间隔调整服务端发送图片的时间；如果服务端发送的太快，导致客户端没来得及接受，会可能导致缓冲区数据丢失
-                for (auto &encode : encodedList)
-                {
-                    send(connectFd, encode.c_str(), encode.size(), 0);
-                    usleep(1000 * 75); // 经过调试，这个睡眠时间比较合适
-                    std::cout << encode;
-                }
-                std::cout << std::endl;
-                // 这里也做一个睡眠吧，因为留意到客户端的接收可能会把结束信息和前面的混在一起，所以这里刻意睡眠500ms
+                // 先发送图片的个数
+                std::string fileNum = std::to_string(fileNameList.size());
+                send(connectFd, fileNum.c_str(), fileNum.size(), 0);
                 usleep(1000 * 500);
-                send(connectFd, sendOver, strlen(sendOver), 0);
+
+                for (int i = 0; i < fileNameList.size(); ++i)
+                {
+                    auto encodedList = tools::readFileAndEncode((std::string("../res/") + fileNameList[i]).c_str());
+
+                    // 先发送图片名字
+                    send(connectFd, fileNameList[i].c_str(), fileNameList[i].size(), 0);
+                    usleep(1000 * 500);
+
+                    // 服务端发送到客户端的接收缓冲区，由于客户端接受的性能问题，显然不是同步接受，因此需要间隔调整服务端发送图片的时间；如果服务端发送的太快，导致客户端没来得及接受，会可能导致缓冲区数据丢失
+                    for (auto &encode : encodedList)
+                    {
+                        send(connectFd, encode.c_str(), encode.size(), 0);
+                        usleep(1000 * 75); // 经过调试，这个睡眠时间比较合适，前面分段的数据就长一点，这里分包的数据传输就小点
+                        std::cout << encode;
+                    }
+                    std::cout << std::endl;
+
+                    send(connectFd, sendOver, strlen(sendOver), 0);
+                    sleep(2); // 每张图片间隔 5 秒
+                }
             }
         }
     }
