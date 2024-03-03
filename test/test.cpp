@@ -37,6 +37,10 @@ int main()
 
         // 读物文件编码
         auto encodedList = tools::readFileAndEncode(inputFilePath.c_str());
+        for (auto &encode : encodedList)
+            std::cout << encode;
+        std::cout << '\n';
+
         // 解码输出到文件
         tools::decodeAndOutputToFile(outputFilePath.c_str(), encodedList);
 
