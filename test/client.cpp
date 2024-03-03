@@ -121,7 +121,7 @@ int main(int argc, char *const argv[])
                 encodedList.push_back(buf);
             }
         }
-        tools::decodeAndOutputToFile("../res/圆形_copy.png", encodedList);
+        tools::decodeAndOutputToFile("../res/鸡你太美_copy.png", encodedList);
     }
 
     // 4. 关闭套接字
