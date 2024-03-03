@@ -17,28 +17,32 @@
 #include "tools.h"
 
 /**
- * @brief 测试读取图片文件，对二进制流进行 base64 编码，然后传递给另一个文件解码再输出成拷贝文件的过程
- * @note 测试 shell 命令：
- * ./test 圆形.png 圆形_copy.png
+ * @brief 测试读取 res 目录下的所有图片文件，对二进制流进行 base64 编码，然后传递给另一个文件解码再输出成拷贝文件的过程
  */
-int main(int argc, char const *argv[])
+int main()
 {
-    if (argc < 3)
+    auto fileNameList = tools::getAllFileName("../res");
+    for (auto &fileName : fileNameList)
     {
-        std::cerr << "usage:  ./test  <inputFileName>  <outputFileName>" << '\n';
-        return -1;
+        std::cout << fileName << '\n';
+
+        std::string inputFilePath = "../res/" + fileName;
+
+        auto outputFileName = fileName;
+        for (int i = 0; i < 4; ++i) // 弹掉 .png
+            outputFileName.pop_back();
+        outputFileName += "_copy.png";
+
+        std::string outputFilePath = "../res/" + outputFileName;
+
+        // 读物文件编码
+        auto encodedList = tools::readFileAndEncode(inputFilePath.c_str());
+        // 解码输出到文件
+        tools::decodeAndOutputToFile(outputFilePath.c_str(), encodedList);
+
+        std::cout << outputFileName << " 文件拷贝完成。" << '\n'
+                  << '\n';
     }
-
-    std::string inputFilePath = "../res/" + std::string(argv[1]);
-    std::string outputFilePath = "../res/" + std::string(argv[2]);
-
-    // 读物文件编码
-    auto encodedList = tools::readFileAndEncode(inputFilePath.c_str());
-    // 解码输出到文件
-    tools::decodeAndOutputToFile(outputFilePath.c_str(), encodedList);
-
-    std::cout << '\n'
-              << "文件拷贝完成。" << '\n';
 
     return 0;
 }

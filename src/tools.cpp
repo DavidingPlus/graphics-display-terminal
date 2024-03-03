@@ -171,4 +171,38 @@ namespace tools
         // 关闭文件
         file.close();
     }
+
+    std::vector<std::string> getAllFileName(const char *inputDirPath)
+    {
+        std::vector<std::string> res;
+
+        // 打开目录
+        DIR *dir = opendir(inputDirPath);
+        if (nullptr == dir)
+        {
+            perror("opendir");
+            exit(-1);
+        }
+
+        // 循环读取目录中的文件
+        // note： 不做读到子目录的处理，因为这个内部工具函数处理的目录保证只有文件
+        struct dirent *ptr = nullptr;
+        while (1)
+        {
+            ptr = readdir(dir);
+            if (nullptr == ptr)
+                break;
+
+            std::string fileName = ptr->d_name;
+            if ("." == fileName or ".." == fileName)
+                continue;
+
+            res.push_back(fileName);
+        }
+
+        // 关闭目录
+        closedir(dir);
+
+        return res;
+    }
 } // namespace tools

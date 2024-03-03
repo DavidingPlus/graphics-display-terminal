@@ -18,6 +18,9 @@
 #include <vector>
 #include <cstring>
 
+#include <unistd.h>
+#include <dirent.h>
+
 /**
  * @brief 定义一次最多读取的数组大小，见 client.cpp 中，定义为 1KB 即可，不用开太多，因为素材图片没那么大
  */
@@ -66,6 +69,13 @@ namespace tools
      * @param encodedList 编码过后的字符串列表
      */
     void decodeAndOutputToFile(const char *outputFilePath, const std::vector<std::string> &encodedList);
+
+    /**
+     * @brief 获取制定目录下所有文件的名称，不包括目录（内部函数，我保证目录内部不存在子目录）
+     * @param inputDirPath 输入目录路径
+     * @return 文件名列表
+     */
+    std::vector<std::string> getAllFileName(const char *inputDirPath);
 
 }; // namespace tools
 
