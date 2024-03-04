@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/">
+        <file>res/connected.png</file>
+        <file>res/lark-logo.png</file>
+        <file>res/unConnected.png</file>
+    </qresource>
+</RCC>

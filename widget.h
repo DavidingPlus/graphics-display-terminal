@@ -2,9 +2,8 @@
 #define WIDGET_H
 
 #include <QWidget>
-
-#include <synchapi.h>
 #include <QtNetwork>
+#include <QString>
 #include <QDebug>
 #include <QByteArray>
 #include <QFile>
@@ -13,10 +12,9 @@
 #include <QPixmap>
 #include <QMessageBox>
 #include <QImageReader>
+#include <QTimer>
 
-#include <iostream>
-#include <string>
-#include <cstring>
+#include <synchapi.h>
 
 #define maxBufferSize 1024
 
@@ -36,12 +34,6 @@ public:
     ~Widget();
 
 signals:
-    // 发送图片接收和写入文件完毕的信号，准备绘图
-    void recvAndWriteOver();
-
-private:
-    bool isBase64(const char& c);
-    std::string base64Decode(const std::string& encodedStr);
 
 private slots:
     void on_connectBtn_clicked();
@@ -49,6 +41,16 @@ private slots:
     void on_recvPicBtn_clicked();
 
     void on_disconnectBtn_clicked();
+
+    void on_clearBtn_clicked();
+
+private:
+    // 给定秒数，将其转化为 xx小时xx分xx秒的格式
+    QString secToString(int seconds);
+
+    bool isBase64(const char& c);
+
+    std::string base64Decode(const std::string& encodedStr);
 
 private:
     Ui::Widget* ui;
@@ -72,6 +74,12 @@ private:
     bool isPicName = false;
 
     // 记录是否在进行图片传输，防止接收过程中乱点
-    bool isRecvPic = false;
+    bool isRecvingPic = false;
+
+    // 定时器对象，维护在线时间
+    QTimer* timer = nullptr;
+
+    // 维护当前经过的秒数（仅作演示，不考虑超出 int 上限）
+    int runSeconds = 0;
 };
 #endif // WIDGET_H

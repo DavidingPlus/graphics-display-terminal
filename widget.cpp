@@ -7,6 +7,23 @@ Widget::Widget(QWidget* parent)
 {
     ui->setupUi(this);
 
+    // 设置大小为固定，具体大小 ui 中给出
+    setFixedSize(width(),height());
+
+    // 初始化定时器对象
+    timer = new QTimer(this);
+    // 绑定信号槽，每隔一秒超时
+    // 启动一次就行了，会每隔这么久时间超时，若想停止定时器就用 stop 函数
+    connect(timer, &QTimer::timeout, this , [ = ]()
+    {
+        ++runSeconds;
+        // 修改在线时间内容
+        ui->timeLabel->setText(QString("在线时长: %1").arg(secToString(runSeconds)));
+    });
+    // 启动定时器
+    timer->start(1000); // 单位毫秒
+
+    // note： Qt 中的 res.qrc 中的资源文件不能使用中文名称，否则会出问题（亲自试验过）
     // note： Qt 中的服务端和客户端的正确方法，和自己用过的 Linux 平台接口不同，用的时候记得查资料
     clientSock = new QTcpSocket(this);
     decode.clear();
@@ -14,6 +31,7 @@ Widget::Widget(QWidget* parent)
     //绑定信号槽，服务端发送信息过来之后自动打印（前提是客户端发送有效信息）
     connect(clientSock, &QTcpSocket::readyRead, this, [ = ]()
     {
+        // TODO： 从我自己的服务器上读取数据，由于传输原因可能导致粘包，但现在不做处理，因为我现在演示在本地起服务端，仅用作演示就不管了
         QByteArray readBuf = clientSock->read(maxBufferSize); // 与服务端发送的包大小对应，即 1024
         qDebug() << readBuf;
 
@@ -27,10 +45,14 @@ Widget::Widget(QWidget* parent)
             return;
         }
 
-        // 图片个数，不做任何处理，仅作过滤作用
+        // 图片个数
         if( 0 == picNum)
         {
             picNum = readBuf.toInt();
+
+            // 修改正在接受图形组件 processLabel
+            ui->processLabel->setText(QString("正在接收图形组件: %1/%2").arg(picIndex).arg(picNum));
+
             return;
         }
 
@@ -43,6 +65,17 @@ Widget::Widget(QWidget* parent)
             file->open(QFile::ReadWrite);
 
             isPicName = false;
+
+            // 修改上方展示的名字标签
+            QString name = file->fileName();// 这里返回的其实是路径，所以我命名才没用 fileName ，就是怕混淆
+            //弹掉前面的 ./res/ 和后面的 .png
+            name.remove(0,6);
+            name.remove(name.size() - 4, 4);
+            ui->picNameLabel->setText(name);
+
+            // 修改正在接受图形组件 processLabel
+            ui->processLabel->setText(QString("正在接收图形组件: %1/%2").arg(1 + picIndex).arg(picNum));
+
             return;
         }
 
@@ -54,9 +87,10 @@ Widget::Widget(QWidget* parent)
             // 关闭文件
             file->close();
 
-            // 图片已经写入文件完毕
+            // 图片已经写入文件完毕，绘图
             // note： 必须先把文件指针关闭，否则由于文件打开，其他操作可能受限，图片可能加载不出来（之前就是这样）
-            emit recvAndWriteOver();
+            ui->picLabel->setScaledContents(true); // 这条是让图片自适应 Label ，不然显示不完整
+            ui->picLabel->setPixmap(file->fileName());
 
             // 修改图片名字标志位，下一次可读取
             isPicName = true;
@@ -67,7 +101,7 @@ Widget::Widget(QWidget* parent)
                 qDebug() << "recv pic successfully.";
                 QMessageBox::information(this, "接收图片", "图片数据接收完毕！");
 
-                isRecvPic = false;
+                isRecvingPic = false;
             }
 
             return;
@@ -77,21 +111,6 @@ Widget::Widget(QWidget* parent)
         decode = QByteArray::fromStdString(base64Decode(readBuf.toStdString()));
         file->write(decode);
         decode.clear();
-    });
-
-    // 绑定信号槽，图片写入完毕之后准备绘图
-    connect(this, &Widget::recvAndWriteOver, [ = ]()
-    {
-        // 修改上方展示的名字标签
-        QString name = file->fileName();// 这里返回的其实是路径，所以我命名才没用 fileName ，就是怕混淆
-        //弹掉前面的 ./res/ 和后面的 .png
-        name.remove(0,6);
-        name.remove(name.size() - 4, 4);
-        ui->picNameLabel->setText(name);
-
-       // 绘图
-       ui->picLabel->setScaledContents(true); // 这条是让图片自适应 Label ，不然显示不完整
-       ui->picLabel->setPixmap(file->fileName());
     });
 }
 
@@ -106,16 +125,16 @@ void Widget::on_connectBtn_clicked()
     if(QAbstractSocket::ConnectedState == clientSock->state())
     {
         qDebug() << "already connected to server, can not connect again!";
-        QMessageBox::warning(this, "连接", "您已经连接上了服务端，不可再次连接！");
+        QMessageBox::warning(this, "连接服务", "您已经连接上了服务端，不可再次连接！");
 
         return;
     }
 
     // 正在传输不可点击
-    if(isRecvPic)
+    if(isRecvingPic)
     {
         qDebug() << "recving pic right now!";
-        QMessageBox::warning(this, "连接", "您正在进行传输，不可进行连接！");
+        QMessageBox::warning(this, "连接服务", "您正在进行传输，不可进行连接！");
 
         return;
     }
@@ -131,7 +150,7 @@ void Widget::on_connectBtn_clicked()
     if(false == res)
     {
         qDebug() << "fail to connect to server, please check your IP or port.";
-        QMessageBox::warning(this, "连接", "服务端 IP 或端口错误，请您检查后重试！");
+        QMessageBox::warning(this, "连接服务", "服务端 IP 或端口错误，请您检查后重试！");
 
         return;
     }
@@ -140,11 +159,12 @@ void Widget::on_connectBtn_clicked()
     while(clientSock->state() != QAbstractSocket::ConnectedState)
         QCoreApplication::processEvents();
 
-    // 修改 isConnectedLabel 内容
-    ui->isConnectedLabel->setText("连接状态：已连接");
+    // 修改 isConnected 标签相关内容
+    ui->isConnectedLabel->setText("已连接");
+    ui->isConnectedPicLabel->setPixmap(QPixmap(":/res/connected.png"));
 
     qDebug() << "connect to server successfully.";
-    QMessageBox::information(this, "连接", "连接服务端成功！");
+    QMessageBox::information(this, "连接服务", "连接服务端成功！");
 }
 
 void Widget::on_recvPicBtn_clicked()
@@ -159,7 +179,7 @@ void Widget::on_recvPicBtn_clicked()
     }
 
     // 正在传输不可再次点击
-    if(isRecvPic)
+    if(isRecvingPic)
     {
         qDebug() << "recving pic right now!";
         QMessageBox::warning(this, "接收图片", "您正在进行传输，不可再次发送接收图片请求！");
@@ -177,7 +197,7 @@ void Widget::on_recvPicBtn_clicked()
     isPicName = true;
 
     // 修改是否正在传输标志位
-    isRecvPic = true;
+    isRecvingPic = true;
 
     // 处理存储图片的目录，先删除在创建
     QDir dir("./"),
@@ -185,7 +205,7 @@ void Widget::on_recvPicBtn_clicked()
     subDir.removeRecursively();
     dir.mkdir("./res/");
 
-    // 讲绘图信息和名字标签信息重置
+    // 重置图片显示名字和内容
     ui->picLabel->setPixmap(QPixmap());
     ui->picNameLabel->setText(QString("无图片"));
 
@@ -208,7 +228,7 @@ void Widget::on_disconnectBtn_clicked()
     }
 
     // 正在传输不可点击
-    if(isRecvPic)
+    if(isRecvingPic)
     {
         qDebug() << "recving pic right now!";
         QMessageBox::warning(this, "断开连接", "您正在进行传输，不可断开连接！");
@@ -221,10 +241,46 @@ void Widget::on_disconnectBtn_clicked()
     clientSock->write(sendMessage.toUtf8());
     clientSock->flush();
 
-    // 修改 isConnectedLabel 内容
-    ui->isConnectedLabel->setText("连接状态：未连接");
+    // 修改 isConnected 标签相关内容
+    ui->isConnectedLabel->setText("未连接");
+    ui->isConnectedPicLabel->setPixmap(QPixmap(":/res/unConnected.png"));
 
     // note： 与服务端断开连接已在接收信息的信号槽中处理，当然这么处理的前提是服务端与客户端协商好通信规则
+}
+
+void Widget::on_clearBtn_clicked()
+{
+    // 正在传输不可点击
+    if(isRecvingPic)
+    {
+        qDebug() << "recving pic right now!";
+        QMessageBox::warning(this, "清空显示", "您正在进行传输，不可清空显示！");
+
+        return;
+    }
+
+    // 重置图片显示名字和内容
+    ui->picLabel->setPixmap(QPixmap());
+    ui->picNameLabel->setText(QString("无图片"));
+
+    // 修改正在接受图形组件 processLabel
+    ui->processLabel->setText(QString("正在接收图形组件: 0/0"));
+
+    qDebug()<<"clear pic display successfully.";
+    QMessageBox::information(this, "清空显示", "清空显示成功!");
+}
+
+QString Widget::secToString(int seconds)
+{
+    // 0 <= seconds < 60， 显示 xx 秒
+    if(seconds >= 0 and seconds < 60)
+        return QString("%1秒").arg(seconds);
+    // 60 <= seconds < 3600， 显示 xx 分 xx 秒
+    if(seconds >= 60 and seconds < 3600)
+        return QString("%1分%2秒").arg(seconds / 60).arg(seconds % 60);
+    // seconds >= 3600， 显示 xx 小时 xx 分 xx 秒（仅作演示，不做年月天的处理）
+    else
+        return QString("%1小时%2分%3秒").arg(seconds / 3600).arg(seconds % 3600 / 60).arg(seconds % 3600 % 60);
 }
 
 bool Widget::isBase64(const char& c)
