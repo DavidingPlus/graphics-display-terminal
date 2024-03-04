@@ -14,7 +14,7 @@ Widget::Widget(QWidget* parent)
     //绑定信号槽，服务端发送信息过来之后自动打印（前提是客户端发送有效信息）
     connect(clientSock, &QTcpSocket::readyRead, this, [ = ]()
     {
-        QByteArray readBuf = clientSock->readAll(); // 这里 Qt 提供了一次性读完的功能
+        QByteArray readBuf = clientSock->read(maxBufferSize); // 与服务端发送的包大小对应，即 1024
         qDebug() << readBuf;
 
         // 做退出的判断
@@ -51,11 +51,12 @@ Widget::Widget(QWidget* parent)
         {
             decode.clear();
 
-            // 图片已经写入文件完毕
-            emit recvAndWriteOver();
-
             // 关闭文件
             file->close();
+
+            // 图片已经写入文件完毕
+            // note： 必须先把文件指针关闭，否则由于文件打开，其他操作可能受限，图片可能加载不出来（之前就是这样）
+            emit recvAndWriteOver();
 
             // 修改图片名字标志位，下一次可读取
             isPicName = true;
@@ -81,12 +82,16 @@ Widget::Widget(QWidget* parent)
     // 绑定信号槽，图片写入完毕之后准备绘图
     connect(this, &Widget::recvAndWriteOver, [ = ]()
     {
+        // 修改上方展示的名字标签
+        QString name = file->fileName();// 这里返回的其实是路径，所以我命名才没用 fileName ，就是怕混淆
+        //弹掉前面的 ./res/ 和后面的 .png
+        name.remove(0,6);
+        name.remove(name.size() - 4, 4);
+        ui->picNameLabel->setText(name);
 
-        qDebug() << file->fileName();
-        qDebug() << file->exists();
-        // TODO： 画图片的逻辑有问题，图片能正确接收但是绘图的时候出问题
-//        ui->picLabel->setScaledContents(true); // 这条是让图片自适应 Label ，不然显示不完整
-//        ui->picLabel->setPixmap(file->fileName());
+       // 绘图
+       ui->picLabel->setScaledContents(true); // 这条是让图片自适应 Label ，不然显示不完整
+       ui->picLabel->setPixmap(file->fileName());
     });
 }
 
@@ -179,6 +184,10 @@ void Widget::on_recvPicBtn_clicked()
          subDir("./res/");
     subDir.removeRecursively();
     dir.mkdir("./res/");
+
+    // 讲绘图信息和名字标签信息重置
+    ui->picLabel->setPixmap(QPixmap());
+    ui->picNameLabel->setText(QString("无图片"));
 
     // 发送信息
     QString sendMessage("send\n");

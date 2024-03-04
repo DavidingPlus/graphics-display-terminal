@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>876</width>
-    <height>675</height>
+    <width>750</width>
+    <height>620</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,12 +16,40 @@
   <layout class="QGridLayout" name="gridLayout_4">
    <item row="0" column="0">
     <layout class="QGridLayout" name="gridLayout_3">
-     <item row="0" column="0">
+     <item row="1" column="1">
+      <widget class="QLabel" name="picLabel">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>250</width>
+         <height>250</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>250</width>
+         <height>250</height>
+        </size>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0" rowspan="2">
       <widget class="QWidget" name="widget" native="true">
        <property name="minimumSize">
         <size>
-         <width>425</width>
-         <height>425</height>
+         <width>250</width>
+         <height>250</height>
         </size>
        </property>
        <property name="maximumSize">
@@ -88,7 +116,7 @@
            </font>
           </property>
           <property name="text">
-           <string>127.0.0.1</string>
+           <string>192.168.236.128</string>
           </property>
          </widget>
         </item>
@@ -96,15 +124,24 @@
       </widget>
      </item>
      <item row="0" column="1">
-      <widget class="QLabel" name="picLabel">
-       <property name="minimumSize">
+      <widget class="QLabel" name="picNameLabel">
+       <property name="maximumSize">
         <size>
-         <width>425</width>
-         <height>425</height>
+         <width>250</width>
+         <height>16777215</height>
         </size>
        </property>
+       <property name="font">
+        <font>
+         <family>楷体</family>
+         <pointsize>16</pointsize>
+        </font>
+       </property>
        <property name="text">
-        <string/>
+        <string>无图片</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
        </property>
       </widget>
      </item>
