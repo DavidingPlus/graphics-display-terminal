@@ -229,21 +229,26 @@ int main(int argc, char *const argv[])
                 {
                     auto encodedList = tools::readFileAndEncode((std::string("../res/") + fileNameList[i]).c_str());
 
-                    // 先发送图片名字
-                    send(connectFd, fileNameList[i].c_str(), fileNameList[i].size(), 0);
+                    // 先发送图片名字和文件大小（文件大小客户端进度条需要）
+                    // 中间用 '\n' 隔开
+                    std::string fileNameSize = fileNameList[i];
+                    fileNameSize += "\n" + std::to_string(tools::getFileSize((std::string("../res/") + fileNameList[i]).c_str()));
+
+                    send(connectFd, fileNameSize.c_str(), fileNameSize.size(), 0);
                     usleep(1000 * 500);
 
                     // 服务端发送到客户端的接收缓冲区，由于客户端接受的性能问题，显然不是同步接受，因此需要间隔调整服务端发送图片的时间；如果服务端发送的太快，导致客户端没来得及接受，会可能导致缓冲区数据丢失
                     for (auto &encode : encodedList)
                     {
                         send(connectFd, encode.c_str(), encode.size(), 0);
-                        usleep(1000 * 75); // 经过调试，这个睡眠时间比较合适，前面分段的数据就长一点，这里分包的数据传输就小点
+                        // usleep(1000 * 75); // old： 经过调试，这个睡眠时间比较合适，前面分段的数据就长一点，这里分包的数据传输就小点
+                        usleep(100 * 500); // 为了进度条的演示，这里的间隔再取得长一点，就与上面统一吧
                         std::cout << encode;
                     }
                     std::cout << std::endl;
 
                     send(connectFd, sendOver, strlen(sendOver), 0);
-                    sleep(2); // 每张图片间隔 5 秒
+                    sleep(5); // 每张图片间隔 5 秒，做演示的时候可调整小点
                 }
             }
         }

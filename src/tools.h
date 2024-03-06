@@ -58,7 +58,7 @@ namespace tools
 
     /**
      * @brief 通过二进制流读取指定文件，并且分块编码输出
-     * @param FilePath 输入文件路径
+     * @param inputFilePath 输入文件路径
      * @return 编码过后的字符串列表
      */
     std::vector<std::string> readFileAndEncode(const char *inputFilePath);
@@ -76,6 +76,13 @@ namespace tools
      * @return 文件名列表
      */
     std::vector<std::string> getAllFileName(const char *inputDirPath);
+
+    /**
+     * @brief 根据输入的文件名获取对应文件的大小，若文件不存在返回 -1
+     * @param inputFilePath 文件路径
+     * @return 文件大小
+     */
+    long getFileSize(const char *inputFilePath);
 
 }; // namespace tools
 

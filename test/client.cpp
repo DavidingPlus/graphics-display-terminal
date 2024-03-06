@@ -145,7 +145,15 @@ int main(int argc, char *const argv[])
                         // 第一次
                         if (0 == num++)
                         {
-                            outputFilePath = std::string("../res/") + std::string(buf);
+                            std::string fileNameSize = buf;
+                            size_t pos = fileNameSize.find('\n');
+                            std::string fileName = fileNameSize.substr(0, pos);
+                            std::string fileSize = std::string{fileNameSize.begin() + pos + 1, fileNameSize.end()};
+
+                            std::cout << fileName << '\n'
+                                      << fileSize << '\n';
+
+                            outputFilePath = std::string("../res/") + fileName;
                             // 加上 _copy 后缀
                             for (int i = 0; i < 4; ++i)
                                 outputFilePath.pop_back();
