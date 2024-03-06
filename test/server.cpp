@@ -248,7 +248,10 @@ int main(int argc, char *const argv[])
                     std::cout << std::endl;
 
                     send(connectFd, sendOver, strlen(sendOver), 0);
-                    sleep(5); // 每张图片间隔 5 秒，做演示的时候可调整小点
+
+                    // 最后一次不睡，因为客户端可能在这五秒发送信息
+                    if (fileNameList.size() - 1 != i)
+                        sleep(5); // 每张图片间隔 5 秒，做演示的时候可调整小点
                 }
             }
         }
