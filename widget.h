@@ -75,8 +75,14 @@ private:
     // 存储图片接受过程中接收的是第几张
     int picIndex = 0;
 
-    // 存储发送图片名字的标志位
-    bool isPicName = false;
+    // 维护当前接收的图片的文件大小
+    int fileSize = 0;
+
+    // 维护当前图片接收的字节进度
+    int fileBytesRecv = 0;
+
+    // 存储发送图片名字和大小的标志位
+    bool isPicNameSize = false;
 
     // 记录是否在进行图片传输，防止接收过程中乱点
     bool isRecvingPic = false;

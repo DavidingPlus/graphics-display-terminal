@@ -62,15 +62,25 @@ Widget::Widget(QWidget *parent)
             return;
         }
 
-        // 图片名字
-        if(isPicName)
+        // 图片名字和大小
+        if(isPicNameSize)
         {
+            QString fileNameSize = QString(readBuf);
+            auto nameSizeList = fileNameSize.split(QChar('\n'));
+
+            // 处理文件大小和当前接受字节数
+            fileSize = nameSizeList[1].toInt();
+            fileBytesRecv = 0;
+
+            // 进度条清空
+            ui->progressBar->setValue(0);
+
             // 打开文件
-            QString filePath = QString("./res/") + QString(readBuf);
+            QString filePath = QString("./res/") + nameSizeList[0];
             file = new QFile(filePath, this);
             file->open(QFile::ReadWrite);
 
-            isPicName = false;
+            isPicNameSize = false;
 
             // 修改上方展示的名字标签
             QString name = file->fileName();// 这里返回的其实是路径，所以我命名才没用 fileName ，就是怕混淆
@@ -117,7 +127,7 @@ Widget::Widget(QWidget *parent)
             picLabels.push_back(newLabel);
 
             // 修改图片名字标志位，下一次可读取
-            isPicName = true;
+            isPicNameSize = true;
 
             // 如果全部接收完毕，弹出一个提示窗口
             if( picNum == ++picIndex)
@@ -134,7 +144,11 @@ Widget::Widget(QWidget *parent)
         // 写入字节数组
         decode = QByteArray::fromStdString(base64Decode(readBuf.toStdString()));
         file->write(decode);
-        decode.clear(); });
+
+        // 修改当前接收字节数，注意，需要的是解码之后的大小
+        fileBytesRecv += decode.size();
+        // 修改进度条
+        ui->progressBar->setValue(float(100) * float(fileBytesRecv) / float(fileSize)); });
 }
 
 Widget::~Widget()
@@ -217,10 +231,17 @@ void Widget::on_recvPicBtn_clicked()
     picIndex = 0;
 
     // 修改发送图片名字的标志位
-    isPicName = true;
+    isPicNameSize = true;
 
     // 修改是否正在传输标志位
     isRecvingPic = true;
+
+    // 重置文件大小和当前接收字节数
+    fileSize = 0;
+    fileBytesRecv = 0;
+
+    // 进度条清空
+    ui->progressBar->setValue(0);
 
     // 处理存储图片的目录，先删除在创建
     QDir dir("./"),
@@ -280,6 +301,9 @@ void Widget::on_clearBtn_clicked()
 
         return;
     }
+
+    // 进度条清空
+    ui->progressBar->setValue(0);
 
     // 重置图片显示名字和内容，以及 frameMidLeft 的最小高
     resetPicDisplay();

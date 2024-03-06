@@ -179,7 +179,7 @@
             </font>
            </property>
            <property name="text">
-            <string>127.0.0.1</string>
+            <string>192.168.236.128</string>
            </property>
           </widget>
          </item>
@@ -259,25 +259,6 @@
          <enum>QFrame::NoFrame</enum>
         </property>
         <layout class="QGridLayout" name="gridLayout_2">
-         <item row="2" column="1">
-          <widget class="QPushButton" name="recvPicBtn">
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="font">
-            <font>
-             <family>楷体</family>
-             <pointsize>18</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>接收图片</string>
-           </property>
-          </widget>
-         </item>
          <item row="0" column="0" colspan="2">
           <widget class="QLabel" name="functionLabel">
            <property name="maximumSize">
@@ -300,6 +281,25 @@
            </property>
           </widget>
          </item>
+         <item row="2" column="0">
+          <widget class="QPushButton" name="clearBtn">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="font">
+            <font>
+             <family>楷体</family>
+             <pointsize>18</pointsize>
+            </font>
+           </property>
+           <property name="text">
+            <string>清空显示</string>
+           </property>
+          </widget>
+         </item>
          <item row="1" column="0">
           <widget class="QPushButton" name="disconnectBtn">
            <property name="minimumSize">
@@ -316,6 +316,57 @@
            </property>
            <property name="text">
             <string>断开连接</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QPushButton" name="recvPicBtn">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="font">
+            <font>
+             <family>楷体</family>
+             <pointsize>18</pointsize>
+            </font>
+           </property>
+           <property name="text">
+            <string>接收图片</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0" colspan="2">
+          <widget class="QLabel" name="picNameLabel">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>75</height>
+            </size>
+           </property>
+           <property name="font">
+            <font>
+             <family>楷体</family>
+             <pointsize>19</pointsize>
+            </font>
+           </property>
+           <property name="frameShape">
+            <enum>QFrame::Box</enum>
+           </property>
+           <property name="text">
+            <string>正在接收:
+无</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
            </property>
           </widget>
          </item>
@@ -338,48 +389,16 @@
            </property>
           </widget>
          </item>
-         <item row="2" column="0">
-          <widget class="QPushButton" name="clearBtn">
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>0</height>
-            </size>
-           </property>
+         <item row="4" column="0" colspan="2">
+          <widget class="QProgressBar" name="progressBar">
            <property name="font">
             <font>
-             <family>楷体</family>
-             <pointsize>18</pointsize>
+             <family>Times New Roman</family>
+             <pointsize>10</pointsize>
             </font>
            </property>
-           <property name="text">
-            <string>清空显示</string>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="0" colspan="2">
-          <widget class="QLabel" name="picNameLabel">
-           <property name="maximumSize">
-            <size>
-             <width>16777215</width>
-             <height>16777215</height>
-            </size>
-           </property>
-           <property name="font">
-            <font>
-             <family>楷体</family>
-             <pointsize>19</pointsize>
-            </font>
-           </property>
-           <property name="frameShape">
-            <enum>QFrame::Box</enum>
-           </property>
-           <property name="text">
-            <string>正在接收:
-无</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
+           <property name="value">
+            <number>0</number>
            </property>
           </widget>
          </item>
@@ -412,7 +431,7 @@
         <x>0</x>
         <y>0</y>
         <width>598</width>
-        <height>473</height>
+        <height>460</height>
        </rect>
       </property>
       <layout class="QGridLayout" name="gridLayout_4">
