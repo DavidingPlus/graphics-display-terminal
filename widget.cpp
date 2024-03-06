@@ -41,15 +41,9 @@ Widget::Widget(QWidget *parent)
         QByteArray readBuf = clientSock->read(maxBufferSize); // 与服务端发送的包大小对应，即 1024
         qDebug() << readBuf;
 
-        // 做退出的判断
+        // 做退出的判断，什么也不做，断开连接在槽函数中处理
         if( QString("exit success\n") == QString(readBuf))
-        {
-            clientSock->disconnectFromHost();
-            qDebug() << "disconnect from server successfully.";
-            QMessageBox::information(this, "断开连接", "与服务端断开连接成功！");
-
             return;
-        }
 
         // 图片个数
         if( 0 == picNum)
@@ -284,11 +278,16 @@ void Widget::on_disconnectBtn_clicked()
     clientSock->write(sendMessage.toUtf8());
     clientSock->flush();
 
+    // 断开连接
+    clientSock->disconnectFromHost();
+    qDebug() << "disconnect from server successfully.";
+
     // 修改 isConnected 标签相关内容
     ui->isConnectedLabel->setText("未连接");
     ui->isConnectedPicLabel->setPixmap(QPixmap(":/res/unConnected.png"));
 
-    // note： 与服务端断开连接已在接收信息的信号槽中处理，当然这么处理的前提是服务端与客户端协商好通信规则
+    // 弹出 MessageBox ，个人感觉在未连接文字和图标状态修改后弹出比较合适
+    QMessageBox::information(this, "断开连接", "与服务端断开连接成功！");
 }
 
 void Widget::on_clearBtn_clicked()
