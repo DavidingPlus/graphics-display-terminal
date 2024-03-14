@@ -5,9 +5,9 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    // Widget w;
-    // w.show();
-    login l;
-    l.show();
+    Widget w;
+    w.show();
+    // login l;
+    // l.show();
     return a.exec();
 }

@@ -76,12 +76,17 @@ Widget::Widget(QWidget *parent)
 
             isPicNameSize = false;
 
-            // 修改上方展示的名字标签
-            QString name = file->fileName();// 这里返回的其实是路径，所以我命名才没用 fileName ，就是怕混淆
+            // 修改 picNameLabel
+            QString name = file->fileName();// 这里返回的其实是路径，所以我命名才没用 fileName ，就是怕混淆，例如 ./res/rect.png
             //弹掉前面的 ./res/ 和后面的 .png
             name.remove(0, 6);
             name.remove(name.size() - 4, 4);
-            ui->picNameLabel->setText(QString("正在接收:\n%1").arg(name));
+            ui->picNameLabel->setText(QString("正在接收:\n%1").arg(nameFromChtoEn(name)));
+
+            // 修改当前接收的图片 picRecvingLabel ，绘图
+            ui->picRecvingLabel->setScaledContents(true); // 这条是让图片自适应 Label ，不然显示不完整
+            ui->picRecvingLabel->setPixmap(QString(":/res/%1.png").arg(name));
+            ui->picRecvingLabel->show(); //将其 show 出来，否则不会展示
 
             // 修改正在接受图形组件 processLabel
             ui->processLabel->setText(QString("正在接收图形组件: %1/%2").arg(1 + picIndex).arg(picNum));
@@ -337,10 +342,49 @@ void Widget::resetPicDisplay()
     }
     picLabels.clear();
 
-    ui->picNameLabel->setText(QString("正在接收:\n无"));
+    // 修改 picNameLabel
+    ui->picNameLabel->setText(QString("正在接收:"));
+
+    // 修改正在接收图片 picRecvingLabel
+    ui->picRecvingLabel->setPixmap(QPixmap());
+    ui->picRecvingLabel->setText(QString("无图片"));
 
     // 重置 frameMidLeft 的最小高， 0 即可
     ui->frameMidLeft->setMinimumHeight(0);
+}
+
+QString Widget::nameFromChtoEn(const QString &chName)
+{
+    if(QString("circle") == chName)
+        return QString("圆形");
+    else if(QString("cross") == chName)
+        return QString("十字形");
+    else if(QString("ellipse") == chName)
+        return QString("椭圆形");
+    else if(QString("hexagon") == chName)
+        return QString("六边形");
+    else if(QString("hexagram") == chName)
+        return QString("六角形形");
+    else if(QString("octagon") == chName)
+        return QString("八边形");
+    else if(QString("parallelogram") == chName)
+        return QString("平行四边形");
+    else if(QString("pentagon") == chName)
+        return QString("五边形");
+    else if(QString("pentagram") == chName)
+        return QString("五角星形");
+    else if(QString("rectangle") == chName)
+        return QString("长方形");
+    else if(QString("rhombus") == chName)
+        return QString("菱形");
+    else if(QString("square") == chName)
+        return QString("正方形");
+    else if(QString("trapezoid") == chName)
+        return QString("梯形");
+    else if(QString("triangle") == chName)
+        return QString("三角形");
+    else
+        return QString();
 }
 
 bool Widget::isBase64(const char &c)

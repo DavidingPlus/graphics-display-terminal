@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>950</width>
-    <height>600</height>
+    <height>645</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -301,30 +301,8 @@ QLineEdit:hover { /* 鼠标悬浮在QLineEdit时的状态 */
         <property name="frameShape">
          <enum>QFrame::NoFrame</enum>
         </property>
-        <layout class="QGridLayout" name="gridLayout_2">
-         <item row="0" column="0" colspan="2">
-          <widget class="QLabel" name="functionLabel">
-           <property name="maximumSize">
-            <size>
-             <width>16777215</width>
-             <height>40</height>
-            </size>
-           </property>
-           <property name="font">
-            <font>
-             <family>楷体</family>
-             <pointsize>16</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>功能操作</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="0">
+        <layout class="QGridLayout" name="gridLayout_6">
+         <item row="3" column="0">
           <widget class="QPushButton" name="clearBtn">
            <property name="minimumSize">
             <size>
@@ -369,7 +347,7 @@ QPushButton:pressed
            </property>
           </widget>
          </item>
-         <item row="1" column="0">
+         <item row="2" column="0">
           <widget class="QPushButton" name="disconnectBtn">
            <property name="minimumSize">
             <size>
@@ -415,83 +393,6 @@ QPushButton:pressed
           </widget>
          </item>
          <item row="2" column="1">
-          <widget class="QPushButton" name="recvPicBtn">
-           <property name="minimumSize">
-            <size>
-             <width>76</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="font">
-            <font>
-             <family>楷体</family>
-             <pointsize>-1</pointsize>
-             <italic>false</italic>
-             <bold>true</bold>
-            </font>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">QPushButton
-{
-	background-color: rgb(227, 222, 220);
-	border-style: outset;
-	border-width: 2px;
-	border-radius:5px; /*边界圆滑*/
-	border-color: #8B7355;
-	font: bold 25px;
-	min-width:2em;
-	padding: 5px;
-}
- 
-QPushButton:hover
-{
-	background-color: rgb(0, 150, 0);
-}
- 
-QPushButton:pressed
-{
-	background-color: #1E90FF; /*伪状态经过时背景色*/ 
-	border-style: inset;
-}</string>
-           </property>
-           <property name="text">
-            <string>接收图片</string>
-           </property>
-          </widget>
-         </item>
-         <item row="3" column="0" colspan="2">
-          <widget class="QLabel" name="picNameLabel">
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>16777215</width>
-             <height>75</height>
-            </size>
-           </property>
-           <property name="font">
-            <font>
-             <family>楷体</family>
-             <pointsize>19</pointsize>
-            </font>
-           </property>
-           <property name="frameShape">
-            <enum>QFrame::Box</enum>
-           </property>
-           <property name="text">
-            <string>正在接收:
-无</string>
-           </property>
-           <property name="alignment">
-            <set>Qt::AlignCenter</set>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="1">
           <widget class="QPushButton" name="connectBtn">
            <property name="minimumSize">
             <size>
@@ -536,7 +437,74 @@ QPushButton:pressed
            </property>
           </widget>
          </item>
-         <item row="4" column="0" colspan="2">
+         <item row="3" column="1">
+          <widget class="QPushButton" name="recvPicBtn">
+           <property name="minimumSize">
+            <size>
+             <width>76</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="font">
+            <font>
+             <family>楷体</family>
+             <pointsize>-1</pointsize>
+             <italic>false</italic>
+             <bold>true</bold>
+            </font>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">QPushButton
+{
+	background-color: rgb(227, 222, 220);
+	border-style: outset;
+	border-width: 2px;
+	border-radius:5px; /*边界圆滑*/
+	border-color: #8B7355;
+	font: bold 25px;
+	min-width:2em;
+	padding: 5px;
+}
+ 
+QPushButton:hover
+{
+	background-color: rgb(0, 150, 0);
+}
+ 
+QPushButton:pressed
+{
+	background-color: #1E90FF; /*伪状态经过时背景色*/ 
+	border-style: inset;
+}</string>
+           </property>
+           <property name="text">
+            <string>接收图片</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0" colspan="2">
+          <widget class="QLabel" name="functionLabel">
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>40</height>
+            </size>
+           </property>
+           <property name="font">
+            <font>
+             <family>楷体</family>
+             <pointsize>16</pointsize>
+            </font>
+           </property>
+           <property name="text">
+            <string>功能操作</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item row="5" column="0" colspan="2">
           <widget class="QProgressBar" name="progressBar">
            <property name="font">
             <font>
@@ -564,6 +532,80 @@ QProgressBar:chunk{
            <property name="value">
             <number>0</number>
            </property>
+          </widget>
+         </item>
+         <item row="4" column="0" colspan="2">
+          <widget class="QFrame" name="picFrame">
+           <property name="frameShape">
+            <enum>QFrame::Box</enum>
+           </property>
+           <layout class="QGridLayout" name="gridLayout_2">
+            <item row="0" column="1">
+             <widget class="QLabel" name="picNameLabel">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="font">
+               <font>
+                <family>楷体</family>
+                <pointsize>15</pointsize>
+               </font>
+              </property>
+              <property name="frameShape">
+               <enum>QFrame::NoFrame</enum>
+              </property>
+              <property name="text">
+               <string>正在接收:</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2">
+             <widget class="QLabel" name="picRecvingLabel">
+              <property name="minimumSize">
+               <size>
+                <width>100</width>
+                <height>100</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>100</width>
+                <height>100</height>
+               </size>
+              </property>
+              <property name="font">
+               <font>
+                <family>楷体</family>
+                <pointsize>15</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>无图片</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </widget>
          </item>
         </layout>
@@ -595,7 +637,7 @@ QProgressBar:chunk{
         <x>0</x>
         <y>0</y>
         <width>598</width>
-        <height>460</height>
+        <height>505</height>
        </rect>
       </property>
       <layout class="QGridLayout" name="gridLayout_4">

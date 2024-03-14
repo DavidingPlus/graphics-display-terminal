@@ -53,6 +53,9 @@ private:
     // 重置图片显示名字和内容，以及 frameMidLeft 的最小高，做一个代码复用
     void resetPicDisplay();
 
+    // 将图形组件名称从英文到中文，为了演示，仅支持规定好的那些图形即可
+    QString nameFromChtoEn(const QString& chName);
+
     bool isBase64(const char &c);
 
     std::string base64Decode(const std::string &encodedStr);
