@@ -8,6 +8,7 @@ set (CMAKE_CXX_COMPILER "g++")
 project(MyProject)
 
 # 添加内存消毒器，为了规范我们的代码
+# 演示的时候为了防止出问题，将其注释掉
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fno-omit-frame-pointer")
 
 #设置CMake_Build_Type
