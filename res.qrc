@@ -1,13 +1,12 @@
 <RCC>
     <qresource prefix="/">
-        <file>res/connected.png</file>
-        <file>res/lark-logo.png</file>
-        <file>res/unConnected.png</file>
         <file>res/circle.png</file>
+        <file>res/connected.png</file>
         <file>res/cross.png</file>
         <file>res/ellipse.png</file>
         <file>res/hexagon.png</file>
         <file>res/hexagram.png</file>
+        <file>res/lark-logo.png</file>
         <file>res/octagon.png</file>
         <file>res/parallelogram.png</file>
         <file>res/pentagon.png</file>
@@ -17,5 +16,6 @@
         <file>res/square.png</file>
         <file>res/trapezoid.png</file>
         <file>res/triangle.png</file>
+        <file>res/unConnected.png</file>
     </qresource>
 </RCC>

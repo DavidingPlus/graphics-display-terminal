@@ -364,7 +364,7 @@ QString Widget::nameFromChtoEn(const QString &chName)
     else if(QString("hexagon") == chName)
         return QString("六边形");
     else if(QString("hexagram") == chName)
-        return QString("六角形形");
+        return QString("六角星形");
     else if(QString("octagon") == chName)
         return QString("八边形");
     else if(QString("parallelogram") == chName)
